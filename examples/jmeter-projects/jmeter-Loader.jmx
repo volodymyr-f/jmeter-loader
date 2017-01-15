@@ -15,7 +15,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">5</stringProp>
+          <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -31,7 +31,7 @@
           <stringProp name="variableName">message1</stringProp>
           <stringProp name="messageBody">{
   &quot;envelope&quot;: {
-    &quot;Received Time&quot;: &quot;08 Sep 2016 14:21:40 (GMT +00:00)&quot;,
+    &quot;Received Time&quot;: &quot;${__randomDate( 2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
     &quot;ID&quot;: &quot;19&quot;,
     &quot;Message Size&quot;: &quot;1.47 (KB)&quot;,
     &quot;Subject&quot;: &quot;Credit Card Number DLP violation test&quot;,
@@ -177,7 +177,7 @@
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="JMeter Loader ES" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="JMeter Loader ES" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
