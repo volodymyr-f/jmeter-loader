@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
  * 
  *  <li>startDate</li> - Begging of the Time Range
  *  <li>endDate</li> - Ending of Time Range
- *  <li></li> - Pattern which will be used to parse data
- *  <li></li> - JMeter variable name.
+ *  <li>pattern</li> - Pattern which will be used to parse data
+ *  <li>variableName</li> - JMeter variable name.
  *  A reference name for reusing the value computed by this function.
  * 
  * 
@@ -41,7 +41,7 @@ public class RandomDateGenerator extends AbstractFunction  {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RandomDateGenerator.class);	
 	
-    private static final int PATTERN_PARAM = 2;
+    
 	private static final List<String> desc = new LinkedList<String>();
     private static final String KEY = "__randomDate";
     
@@ -50,12 +50,10 @@ public class RandomDateGenerator extends AbstractFunction  {
     private static final String DEFAULT_MAX_DATE = "2020-01-01";
     
     private String pattern = DEFAULT_PATTERN;
-
-    
-    DateTimeFormatter formatter = null;    
-
-    
+    private static final int PATTERN_PARAM = 2;
     private static final int MAX_PARAMS_COUNT = 4;
+    
+    DateTimeFormatter formatter = null;
     
     static {
         desc.add("Generates rendom date in specified period");
@@ -114,7 +112,7 @@ public class RandomDateGenerator extends AbstractFunction  {
 		
 		//If there is defined pattern 
 		if(values.length > PATTERN_PARAM){
-			pattern = ((CompoundVariable) values[PATTERN_PARAM]).execute();			
+			pattern = ((CompoundVariable) values[PATTERN_PARAM]).execute().trim();			
 		}
 		formatter = new DateTimeFormatterBuilder().appendPattern(pattern)
 	            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
@@ -129,7 +127,7 @@ public class RandomDateGenerator extends AbstractFunction  {
 	private void setMaxDate(String maxDate, DateTimeFormatter formatter) {
 		int maxDatePosition = 1;
 		if (values.length > maxDatePosition){
-			maxDate = ((CompoundVariable) values[maxDatePosition]).execute();					
+			maxDate = ((CompoundVariable) values[maxDatePosition]).execute().trim();					
 		}
 		dMax =  parseDate(maxDate, formatter);
 	}
@@ -137,7 +135,7 @@ public class RandomDateGenerator extends AbstractFunction  {
 	private void setMinDate(String minDate, DateTimeFormatter formatter) {
 		int minDatePosition = 0;
 		if (values.length > minDatePosition){
-			minDate = ((CompoundVariable) values[minDatePosition]).execute();					
+			minDate = ((CompoundVariable) values[minDatePosition]).execute().trim();					
 		}
 		dMin =  parseDate(minDate, formatter);
 	}

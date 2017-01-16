@@ -5,19 +5,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.jmeter.engine.util.CompoundVariable;
 import org.apache.jmeter.functions.InvalidVariableException;
+
 import org.junit.Test;
+
 import org.junit.Assert;
 
 public class RandomDateGeneratorTest {
 	
 	private RandomDateGenerator dateGenerator = new RandomDateGenerator();
 		
-    /**
-     * Test of execute method, of class UpperCase.
-     */
     @Test
     public void testExecuteWithDateRange() throws Exception {
         Collection<CompoundVariable> parameters = new ArrayList<>();
@@ -98,8 +98,27 @@ public class RandomDateGeneratorTest {
         
         Assert.assertTrue(ldtG.isAfter(ldtS) || ldtG.isEqual(ldtS));
         Assert.assertTrue(ldtG.isBefore(ldtE) || ldtG.isEqual(ldtE));
+	}	
 
-	}
+	
+    /**
+     * Test of getReferenceKey method
+     */
+    @Test
+    public void testGetReferenceKey() {
+        String expResult = "__randomDate";
+        String result = dateGenerator.getReferenceKey();
+        Assert.assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of getArgumentDesc method
+     */
+    @Test
+    public void testGetArgumentDesc() {
+        List<String> result = dateGenerator.getArgumentDesc();
+        Assert.assertEquals(2, result.size());
+    }
 	
 
 
