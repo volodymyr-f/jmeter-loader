@@ -8,7 +8,6 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,6 +19,8 @@ import org.apache.jmeter.samplers.Sampler;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -39,119 +40,91 @@ import org.slf4j.LoggerFactory;
  */
 public class RandomDateGenerator extends AbstractFunction  {	
 	
+	private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
+
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RandomDateGenerator.class);	
 	
     
-	private static final List<String> desc = new LinkedList<String>();
+	private static final List<String> DESCRIPTION =  ImmutableList.of("Generates rendom date in specified period", 
+			"Name of variable in which to store the result (optional)");
     private static final String KEY = "__randomDate";
     
-    private static final String DEFAULT_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_MIN_DATE = "1970-01-01";
-    private static final String DEFAULT_MAX_DATE = "2020-01-01";
-    
-    private String pattern = DEFAULT_PATTERN;
+    private static final String DEFAULT_MAX_DATE = "2020-01-01";    
+
     private static final int PATTERN_PARAM = 2;
     private static final int MAX_PARAMS_COUNT = 4;
     
-    DateTimeFormatter formatter = null;
-    
-    static {
-        desc.add("Generates rendom date in specified period");
-        desc.add("Name of variable in which to store the result (optional)");
-    }
-    
-    private Object[] values;
-    
-    private LocalDateTime dMin = null;
-    private LocalDateTime dMax = null;
-    
-    /**
-     * No-arg constructor.
-     */
-    public RandomDateGenerator(){
-    	
-    }
+    private Object[] values;    
     
 	@Override
-	public synchronized List<String> getArgumentDesc() {
-		return desc;
+	public List<String> getArgumentDesc() {
+		return DESCRIPTION;
 	}
 	
 	@Override
-	public synchronized String execute(SampleResult previousResult, Sampler currentSampler) throws InvalidVariableException {
+	public String execute(SampleResult previousResult, Sampler currentSampler) throws InvalidVariableException {
         JMeterVariables vars = getVariables();        
-        setDateRange();
+        DateTimeFormatter formatter  = getFormatter();
         
-        String res = generateDateInRange().format(formatter);
+        LocalDateTime dMin = parseDate(formatter, DEFAULT_MIN_DATE, 0);
+        LocalDateTime dMax = parseDate(formatter, DEFAULT_MAX_DATE, 1);	
+        
+        String res = generateDateInRange(dMin, dMax, formatter);
 
-        if (vars != null && values.length == MAX_PARAMS_COUNT) {
-            String varName = ((CompoundVariable) values[MAX_PARAMS_COUNT -1]).execute().trim();
-            vars.put(varName, res);
-        }
+        populateJMeterVar(vars, res);
 
         return res;
 	}
+
+	private void populateJMeterVar(JMeterVariables vars, String res) {
+		if (vars != null && values.length == MAX_PARAMS_COUNT) {
+            String varName = ((CompoundVariable) values[MAX_PARAMS_COUNT -1]).execute().trim();
+            vars.put(varName, res);
+        }
+	}
 	
 	@Override
-	public synchronized void setParameters(Collection<CompoundVariable> parameters) throws InvalidVariableException {
+	public void setParameters(Collection<CompoundVariable> parameters) throws InvalidVariableException {
 		checkParameterCount(parameters, 0, MAX_PARAMS_COUNT);
         values = parameters.toArray();
 	}
 	
 	@Override
-	public synchronized String getReferenceKey() {
+	public String getReferenceKey() {
         return KEY;
 	}
 	
-	private void setDateRange(){
-		if (values == null){
-			return;
-		}
-		String minDate = DEFAULT_MIN_DATE;
-		String maxDate = DEFAULT_MAX_DATE;
+	private DateTimeFormatter getFormatter(){
+	
+		String pattern = DEFAULT_DATE_PATTERN; 
 		
 		//If there is defined pattern 
 		if(values.length > PATTERN_PARAM){
 			pattern = ((CompoundVariable) values[PATTERN_PARAM]).execute().trim();			
 		}
-		formatter = new DateTimeFormatterBuilder().appendPattern(pattern)
+		return new DateTimeFormatterBuilder().appendPattern(pattern)
 	            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
 	            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
 	            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-	            .toFormatter(); 
-		
-		setMinDate(minDate, formatter);
-		setMaxDate(maxDate, formatter);		
+	            .toFormatter();
 	}
 
-	private void setMaxDate(String maxDate, DateTimeFormatter formatter) {
-		int maxDatePosition = 1;
-		if (values.length > maxDatePosition){
-			maxDate = ((CompoundVariable) values[maxDatePosition]).execute().trim();					
-		}
-		dMax =  parseDate(maxDate, formatter);
-	}
-	
-	private void setMinDate(String minDate, DateTimeFormatter formatter) {
-		int minDatePosition = 0;
-		if (values.length > minDatePosition){
-			minDate = ((CompoundVariable) values[minDatePosition]).execute().trim();					
-		}
-		dMin =  parseDate(minDate, formatter);
-	}
-
-	private LocalDateTime parseDate(String stringDate, DateTimeFormatter formatter) {		
-		try {
-			return  LocalDateTime.parse(stringDate, formatter);
-		} catch (DateTimeParseException e) {
-			LOGGER.error("Can't parse specified date: "+ e.getMessage());
+	private LocalDateTime parseDate(DateTimeFormatter formatter, String date, int datePosition) {
+		if (values.length > datePosition) {
+			date = ((CompoundVariable) values[datePosition]).execute().trim();
+			try {
+				return LocalDateTime.parse(date, formatter);
+			} catch (DateTimeParseException e) {
+				LOGGER.error("Can't parse specified date: " + e.getMessage());
+			}
 		}
 		return null;
 	}
-	
-	
-	public LocalDateTime generateDateInRange() {
-		long millis = dMin.until( dMax, ChronoUnit.MILLIS);	
-		return dMin.plus(ThreadLocalRandom.current().nextLong(millis), ChronoUnit.MILLIS);		
+
+	private String generateDateInRange(LocalDateTime dMin, LocalDateTime dMax, DateTimeFormatter formatter) {
+		long millis = dMin.until(dMax, ChronoUnit.MILLIS);
+		return dMin.plus(ThreadLocalRandom.current().nextLong(millis), ChronoUnit.MILLIS).format(formatter);
 	}
 }
