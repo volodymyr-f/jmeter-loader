@@ -1,0 +1,90 @@
+---
+- hosts: all_groups
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+      - name: update hosts file
+        template: src=./hosts dest=/etc/hosts
+      - name: install general packages
+        yum: name=wget,mc,net-tools,tmux,telnet,vim state=present
+      - name: install java
+        script: /vagrant/bootstrap/install_java.sh
+        args:
+            creates: /opt/java
+- hosts: kafka
+  vars:
+    kafka_home: /opt/kafka
+    kafka_topic_name: jmeter-loader
+    kafka_replication_factor: 1
+    kafka_partitions_number: 1
+    kafka_domain: localhost
+    kafka_port: 9092
+    zookeeper_port: 2181
+    zookeeper_domain: localhost
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+      - name: install kafka
+        script: /vagrant/bootstrap/kafka/install_kafka.sh
+        args:
+            creates: /opt/kafka
+      - name: run zookeper
+        shell: "nohup {{ kafka_home }}/bin/zookeeper-server-start.sh {{ kafka_home }}/config/zookeeper.properties > {{ kafka_home }}/logs/zoo-server.log 2>&1 &"
+      - name: wait for zookeper server
+        local_action: wait_for host={{ zookeeper_domain }} state=started port={{ zookeeper_port }} delay=20 timeout=300 connect_timeout=15
+      - name: run kafka
+        shell: "nohup {{ kafka_home }}/bin/kafka-server-start.sh {{ kafka_home }}/config/server.properties > {{ kafka_home }}/logs/kafka-server.log 2>&1 &"
+      - name: wait for kafka server
+        local_action: wait_for host={{ kafka_domain }} state=started port={{ kafka_port }} delay=20 timeout=300 connect_timeout=15
+      - name: create topic
+        shell: "{{ kafka_home }}/bin/kafka-topics.sh --create --zookeeper {{ zookeeper_domain }}:{{ zookeeper_port }} --replication-factor {{ kafka_replication_factor }} --partitions {{ kafka_partitions_number }} --topic {{ kafka_topic_name }} &"
+- hosts: spark
+  vars:
+    spark_home: /opt/spark
+    spark_domain: localhost
+    spark_port: 8080
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+      - name: install spark
+        script: /vagrant/bootstrap/spark/install_spark.sh
+        args:
+            creates: /opt/spark
+      - name: create spark properties
+        template: src=./bootstrap/spark/variables dest=/opt/spark/variables
+      - name: run spark
+        shell: "source {{ spark_home }}/variables && {{ spark_home }}/sbin/./start-all.sh"
+      - name: wait for spark server
+        local_action: wait_for host={{ spark_domain }} state=started port={{ spark_port }} delay=20 timeout=300 connect_timeout=15
+- hosts: cassandra
+  vars:
+    cassandra_version: 3.9
+    cassandra_cluster_name: cluster-jmeter-loader
+    cassandra_cluster_node_number: 3
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+      - name: install git
+        yum: name=git state=present
+      - name: install python-pip
+        yum: name=python-pip state=present
+      - name: install PyYAML
+        shell: pip install cql PyYAML
+      - name: install cassandra cluster manager
+        script: /vagrant/bootstrap/cassandra/install_ccm.sh
+        args:
+            creates: /opt/ccm
+      - name: create cassandra cluster
+        shell: "ccm create {{ cassandra_cluster_name }} -v {{ cassandra_version }} && touch /opt/ccm/cluster_creation.log > /opt/ccm/cluster_creation.log"
+        args:
+            creates: "/home/vagrant/.ccm/{{ cassandra_cluster_name }}"
+      - name: add nodes to cassandra cluster
+        shell: ccm populate --nodes {{ cassandra_cluster_node_number }} && touch /opt/ccm/cluster_population.log > /opt/ccm/cluster_population.log
+      - name: start cassandra cluster manager
+        shell: ccm start && touch /opt/ccm/start_cluster.log > /opt/ccm/start_cluster.log
+      - name: install cqlsh
+        shell: pip install cqlsh
