@@ -4,10 +4,8 @@
   become: yes
   become_method: sudo
   tasks:
-      - name: update hosts file
-        template: src=./hosts dest=/etc/hosts
       - name: install general packages
-        yum: name=wget,mc,net-tools,tmux,telnet,vim state=present
+        yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python state=present
       - name: install java
         script: /vagrant/bootstrap/install_java.sh
         args:
@@ -18,28 +16,32 @@
     kafka_topic_name: jmeter-loader
     kafka_replication_factor: 1
     kafka_partitions_number: 1
-    kafka_domain: localhost
+    kafka_version: 2.12-0.10.2.0
+    kafka_domain: 192.168.33.10
     kafka_port: 9092
     zookeeper_port: 2181
-    zookeeper_domain: localhost
+    zookeeper_domain: 192.168.33.10
   remote_user: vagrant
   become: yes
   become_method: sudo
   tasks:
       - name: install kafka
-        script: /vagrant/bootstrap/kafka/install_kafka.sh
+        script: "/vagrant/bootstrap/kafka/install_kafka.sh {{kafka_version}} {{kafka_domain}} {{kafka_port}}"
         args:
             creates: /opt/kafka
-      - name: run zookeper
-        shell: "nohup {{ kafka_home }}/bin/zookeeper-server-start.sh {{ kafka_home }}/config/zookeeper.properties > {{ kafka_home }}/logs/zoo-server.log 2>&1 &"
-      - name: wait for zookeper server
-        local_action: wait_for host={{ zookeeper_domain }} state=started port={{ zookeeper_port }} delay=20 timeout=300 connect_timeout=15
-      - name: run kafka
-        shell: "nohup {{ kafka_home }}/bin/kafka-server-start.sh {{ kafka_home }}/config/server.properties > {{ kafka_home }}/logs/kafka-server.log 2>&1 &"
-      - name: wait for kafka server
-        local_action: wait_for host={{ kafka_domain }} state=started port={{ kafka_port }} delay=20 timeout=300 connect_timeout=15
+      - name: copy init scripts to manage kafka and zookeeper servers
+        copy: src={{ item.src }} dest={{ item.dest }} mode=751
+        with_items:
+            - { src: '/vagrant/bootstrap/kafka/kafka', dest: '/etc/init.d/kafka' }
+            - { src: '/vagrant/bootstrap/kafka/zookeeper', dest: '/etc/init.d/zookeeper' }
+      - name: prepare shutdown runlevel symlinks for zookeeper and kafka
+        script: /vagrant/bootstrap/kafka/prepare_shutdown_symlinks.sh
+      - name: start zookeeper
+        service: name=zookeeper enabled=yes state=started runlevel=0356
+      - name: start kafka
+        service: name=kafka enabled=yes state=started runlevel=0356
       - name: create topic
-        shell: "{{ kafka_home }}/bin/kafka-topics.sh --create --zookeeper {{ zookeeper_domain }}:{{ zookeeper_port }} --replication-factor {{ kafka_replication_factor }} --partitions {{ kafka_partitions_number }} --topic {{ kafka_topic_name }} &"
+        shell: "{{ kafka_home }}/bin/kafka-topics.sh --create --zookeeper {{ zookeeper_domain }}:{{ zookeeper_port }} --replication-factor {{ kafka_replication_factor }} --partitions {{ kafka_partitions_number }} --topic {{ kafka_topic_name }} &"  
 - hosts: spark
   vars:
     spark_home: /opt/spark

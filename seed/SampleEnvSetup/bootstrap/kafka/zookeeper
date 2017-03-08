@@ -1,0 +1,44 @@
+#!/bin/bash
+# chkconfig: 0356 20 80
+# description: Script is used to manage zookeeper server
+
+# Source function library.
+. /etc/init.d/functions
+
+PIDS=$(ps ax | grep java | grep -i QuorumPeerMain | grep -v grep | awk '{print $1}')
+
+start() {
+    nohup /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties > /opt/kafka/logs/zoo-server.log 2>&1 &
+    touch /var/lock/subsys/zookeeper
+}
+
+stop() {
+    /opt/kafka/bin/zookeeper-server-stop.sh
+    rm -f /var/lock/subsys/zookeeper
+}
+
+case "$1" in
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    status)
+       if [ -z "$PIDS" ]; then
+           echo "No zookeeper server to stop"
+           exit 1
+       else
+           echo "Zookeeper is running. Pid is $PIDS"
+           exit 0
+       fi
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0
