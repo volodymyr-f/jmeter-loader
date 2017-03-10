@@ -1,11 +1,16 @@
 package com.jmeter.ext.kafka;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.engine.util.CompoundVariable;
+import org.apache.jmeter.engine.util.ReplaceStringWithFunctions;
+import org.apache.jmeter.functions.InvalidVariableException;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.testelement.property.StringProperty;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.slf4j.Logger;
@@ -52,6 +57,12 @@ public class KafkaSampler extends AbstractJavaSamplerClient {
 		String key = javaSamplerContext.getParameter(KAFKA_KEY);
 		String messageBodyKey = javaSamplerContext.getParameter(MESSAGE);
 		String message = variables.get(messageBodyKey);
+		StringProperty stringProperty = new StringProperty("csv_props", message);		
+
+		// Hack to resolve not resolved on configuration step variables	
+		// As message is generated in config message it didn't resolve 
+		// JMeter variables that are loaded by CSV loader
+		message = executeVariables(message, stringProperty);
  
 		try {
 			KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, key, message);
@@ -63,7 +74,20 @@ public class KafkaSampler extends AbstractJavaSamplerClient {
 		return sampleResult;
 	}
 
-
+	private String executeVariables(String message, StringProperty stringProperty) {
+		CompoundVariable function = new CompoundVariable();		
+		ReplaceStringWithFunctions transform  = new ReplaceStringWithFunctions(function,
+				new HashMap<>());
+		try {
+			transform.transformValue(stringProperty);
+			message = function.execute();
+			
+		} catch (InvalidVariableException e1) {
+			// Do nothing
+			// This step just for resolving of unresolved variables
+		}
+		return message;
+	}
 
 	@Override
 	public Arguments getDefaultParameters() {

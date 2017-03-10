@@ -11,11 +11,33 @@
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="project_home" elementType="Argument">
+            <stringProp name="Argument.name">project_home</stringProp>
+            <stringProp name="Argument.value">${__P(JMETER_LOADER_HOME)}</stringProp>
+            <stringProp name="Argument.desc">Path to the project</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+        <stringProp name="filename">${project_home}/sample_data/2016_04_en_clickstream_small.csv</stringProp>
+        <stringProp name="fileEncoding"></stringProp>
+        <stringProp name="variableNames">previous,current,type,hits</stringProp>
+        <stringProp name="delimiter">\t</stringProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">true</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="JMeter Loder Kafka" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
+          <stringProp name="LoopController.loops">2</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -26,26 +48,27 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">counter_id</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
         <com.jmeter.ext.message.GeneratedMessage guiclass="TestBeanGUI" testclass="com.jmeter.ext.message.GeneratedMessage" testname="Message1" enabled="true">
           <stringProp name="className">com.jmeter.ext.loader.Loader</stringProp>
           <stringProp name="variableName">message1</stringProp>
           <stringProp name="messageBody">{
-  &quot;envelope&quot;: {
-    &quot;Received Time&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
-    &quot;ID&quot;: &quot;19&quot;,
-    &quot;Message Size&quot;: &quot;1.47 (KB)&quot;,
-    &quot;Random Subject&quot;: &quot;${__randomSentance(6, 10)}&quot;,
-    &quot;Subject&quot;: &quot;Credit Card Number DLP violation test&quot;,
-    &quot;Sender&quot;: &quot;cooldude@mail.qa.sgg.cisco.com&quot;,
-    &quot;Recipients&quot;: &quot;t.t${__Random(1, 10000)}@myinc.com&quot;,
-    &quot;Message ID&quot;: &quot;&lt;7f7b24$j@x1070q02.ibqa&gt;&quot;,
-    &quot;Auth User ID&quot;: &quot;NA&quot;,
-    &quot;Attachments&quot;: &quot;NA&quot;
-  },
-  &quot;host&quot;:{
-    &quot;DNS Hostname&quot;: &quot;vm30bsd0209.ibqa (verified)&quot;,
-    &quot;IP Address&quot;: &quot;10.76.70.175&quot;
-  }
+    &quot;m_id&quot;: &quot;${counter_id}&quot;,
+    &quot;tenant_id&quot; : &quot;1001&quot;,
+    &quot;prev_link&quot;: &quot;${previous}&quot;,
+    &quot;curr_link&quot;: &quot;${current}&quot;,
+    &quot;timestamp_clicked&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
+    &quot;timestamp_received&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
+    &quot;message&quot;: &quot;${__randomSentance(6, 10)}&quot;, 
+    &quot;type&quot;: &quot;${type}&quot;
 }</stringProp>
           <stringProp name="variable">message_1</stringProp>
         </com.jmeter.ext.message.GeneratedMessage>
@@ -55,12 +78,12 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="kafka_brokers" elementType="Argument">
                 <stringProp name="Argument.name">kafka_brokers</stringProp>
-                <stringProp name="Argument.value">192.168.10.10:9092</stringProp>
+                <stringProp name="Argument.value">192.168.33.10:9092</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="default_topic" elementType="Argument">
                 <stringProp name="Argument.name">default_topic</stringProp>
-                <stringProp name="Argument.value">jmeter-loader1</stringProp>
+                <stringProp name="Argument.value">loader_1</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="kafka_key" elementType="Argument">
