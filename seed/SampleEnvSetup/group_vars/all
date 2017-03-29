@@ -1,0 +1,6 @@
+kafka_domain: 192.168.33.10
+kafka_topic: jmeter_loader
+cassandra_domain: 192.168.33.11
+cassandra_keyspace: loaderkeyspace
+cassandra_table: events_raw
+spark_domain: 192.168.33.12

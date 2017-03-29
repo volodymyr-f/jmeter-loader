@@ -1,0 +1,43 @@
+#!/bin/bash
+# chkconfig: 0356 30 65
+# description: Script is used to manage spark consumer
+
+# Source function library.
+. /etc/init.d/functions
+
+PIDS=$(ps ax | grep -i 'spark-structured-streaming-loader' | grep java | grep -v grep | awk '{print $1}')
+
+start() {
+    nohup /opt/spark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.1.0 --class com.loader.KafkaConsumer --master local[*] /opt/spark-structured-streaming-loader/target/scala-2.11/sparkStructuredStreamingLoader.jar  > /opt/spark-structured-streaming-loader/logs/spark-consumer.log 2>&1 &
+}
+
+stop() {
+     kill -s TERM $PIDS
+}
+
+case "$1" in
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    status)
+       if [ -z "$PIDS" ]; then
+           echo "No spark consumer is running"
+           exit 1
+       else
+           echo 'Spark consumer pid:' $PIDS
+
+           exit 0
+       fi
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0

@@ -34,7 +34,7 @@ case "$1" in
        ;;
     status)
        if [ -z "$PIDS" ]; then
-           echo "No kafka server to stop"
+           echo "No kafka server is running"
            exit 1
        else
            echo "Kafka is running. Pid is $PIDS"

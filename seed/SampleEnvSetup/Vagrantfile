@@ -1,8 +1,8 @@
 ANSIBLE_GROUPS = {
-	    "kafka" => ["kafka"],
-	    "spark" => ["spark"],
-	    "cassandra" => ["cassandra"],
-	    "all_groups:children" => ["kafka", "spark", "cassandra"]
+        "kafka" => ["kafka"],
+        "cassandra" => ["cassandra"],
+        "spark" => ["spark"],
+        "all:children" => ["kafka", "cassandra", "spark"]
 }
   
 Vagrant.configure(2) do |config|
@@ -16,37 +16,38 @@ Vagrant.configure(2) do |config|
             ansible.playbook = "playbook.yml"
             ansible.groups = ANSIBLE_GROUPS
         end
-		kafka.vm.provider :virtualbox do |vb|
+        kafka.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048"]
           vb.customize ["modifyvm", :id, "--cpus", "1"]
-		end
+        end
+    end
+
+    config.vm.define "cassandra" do |cassandra|
+        cassandra.vm.network "private_network", ip: "192.168.33.11"
+        cassandra.vm.hostname = "cassandra"
+        cassandra.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"
+        cassandra.vm.provision "ansible", type:"ansible_local" do |ansible|
+            ansible.playbook = "playbook.yml"
+            ansible.groups = ANSIBLE_GROUPS
+        end
+        cassandra.vm.provider :virtualbox do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "1024"]
+          vb.customize ["modifyvm", :id, "--cpus", "1"]
+        end
     end
 
     config.vm.define "spark" do |spark|
-        spark.vm.network "private_network", ip: "192.168.33.11"
+        spark.vm.network "private_network", ip: "192.168.33.12"
         spark.vm.hostname = "spark"
         spark.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"
         spark.vm.provision "ansible", type:"ansible_local" do |ansible|
             ansible.playbook = "playbook.yml"
             ansible.groups = ANSIBLE_GROUPS
         end
-		spark.vm.provider :virtualbox do |vb|
-          vb.customize ["modifyvm", :id, "--memory", "1024"]
+        spark.vm.provider :virtualbox do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "2048"]
           vb.customize ["modifyvm", :id, "--cpus", "1"]
-		end
+        end
     end
 
-    config.vm.define "cassandra" do |cassandra|
-        cassandra.vm.network "private_network", ip: "192.168.33.12"
-        cassandra.vm.hostname = "cassandra"
-        #cassandra.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"
-        #cassandra.vm.provision "ansible", type:"ansible_local" do |ansible|
-            #ansible.playbook = "playbook.yml"
-            #ansible.groups = ANSIBLE_GROUPS
-        #end
-		cassandra.vm.provider :virtualbox do |vb|
-          vb.customize ["modifyvm", :id, "--memory", "256"]
-          vb.customize ["modifyvm", :id, "--cpus", "1"]
-		end
-    end
 end

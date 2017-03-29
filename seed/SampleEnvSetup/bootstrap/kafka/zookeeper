@@ -30,7 +30,7 @@ case "$1" in
        ;;
     status)
        if [ -z "$PIDS" ]; then
-           echo "No zookeeper server to stop"
+           echo "No zookeeper server is running"
            exit 1
        else
            echo "Zookeeper is running. Pid is $PIDS"
