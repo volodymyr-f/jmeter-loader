@@ -42,7 +42,7 @@
 - hosts: cassandra
   vars:
       cassandra_version: 2
-      cassandra_port: 9142
+      cassandra_port: 9160
   remote_user: vagrant
   become: yes
   become_method: sudo
