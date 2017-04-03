@@ -54,10 +54,10 @@
             - { src: '/vagrant/bootstrap/cassandra/create_keyspace_and_table.j2', dest: '/opt/create_keyspace_and_table.cql' }
       - name: install cassandra
         yum: name="dsc{{cassandra_version}}" state=present
-      - name: install cassandra properties
-        script: "/vagrant/bootstrap/cassandra/install_cassandra_properties.sh {{ cassandra_domain }}"
+      - name: configure cassandra
+        script: "/vagrant/bootstrap/cassandra/configure_cassandra.sh {{ cassandra_domain }}"
       - name: start cassandra
-        service: name=cassandra enabled=yes state=started
+        systemd: name=cassandra enabled=yes state=started
       - name: wait for cassandra server
         local_action: wait_for host={{ cassandra_domain }} state=started port={{ cassandra_port }} delay=20 timeout=40 connect_timeout=10
       - name: create keyspace and table
