@@ -41,8 +41,8 @@
         shell: "{{ kafka_home }}/bin/kafka-topics.sh --create --zookeeper {{ kafka_domain }}:{{ zookeeper_port }} --replication-factor {{ kafka_replication_factor }} --partitions {{ kafka_partitions_number }} --topic {{ kafka_topic }} &"  
 - hosts: cassandra
   vars:
-      cassandra_version: 2
-      cassandra_port: 9160
+      cassandra_version: 30
+      cassandra_port: 9042
   remote_user: vagrant
   become: yes
   become_method: sudo
@@ -53,7 +53,7 @@
             - { src: '/vagrant/bootstrap/cassandra/datastax.repo', dest: '/etc/yum.repos.d/datastax.repo' }
             - { src: '/vagrant/bootstrap/cassandra/create_keyspace_and_table.j2', dest: '/opt/create_keyspace_and_table.cql' }
       - name: install cassandra
-        yum: name="dsc{{cassandra_version}}0" state=present
+        yum: name="dsc{{cassandra_version}}" state=present
       - name: install cassandra properties
         script: "/vagrant/bootstrap/cassandra/install_cassandra_properties.sh {{ cassandra_domain }}"
       - name: start cassandra
@@ -78,7 +78,7 @@
         args:
             creates: /opt/spark
       - name: install spark consumer
-        script: "/vagrant/bootstrap/spark/install_spark_consumer.sh {{ kafka_domain }} {{ kafka_topic }} {{ cassandra_domain }} {{ cassandra_keyspace }} {{ cassandra_table }}"
+        script: "/vagrant/bootstrap/spark/install_spark_consumer.sh {{ cassandra_domain }} {{ cassandra_keyspace }} {{ cassandra_table }} {{ kafka_domain }} {{ kafka_topic }}"
         args:
             creates: /opt/spark-structured-streaming-loader
       - name: copy init.d scripts to manage spark cluster and consumer

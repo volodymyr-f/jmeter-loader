@@ -1,5 +1,5 @@
 #!/bin/bash
-# chkconfig: 0356 20 80
+# chkconfig: 2345 23 80
 # description: Script is used to manage spark cluster servers
 
 # Source function library.
