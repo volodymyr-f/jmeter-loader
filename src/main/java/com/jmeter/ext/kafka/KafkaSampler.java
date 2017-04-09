@@ -52,6 +52,8 @@ public class KafkaSampler extends AbstractJavaSamplerClient {
 		SampleResult sampleResult = new SampleResult();
 		sampleResult.setDataType(SampleResult.TEXT);
 		JMeterVariables variables = JMeterContextService.getContext().getVariables();
+		
+		sampleResult.sampleStart();
 
 		String topic = javaSamplerContext.getParameter(TOPIC_NAME);
 		String key = javaSamplerContext.getParameter(KAFKA_KEY);
