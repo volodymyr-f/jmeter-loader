@@ -9,7 +9,8 @@
     <url>http://maven.apache.org</url>
     <properties>
         <jmeter.home>/usr/local/Cellar/jmeter/2.13/libexec</jmeter.home>
-        <jmeter.extentions>${jmeter.home}/lib/ext</jmeter.extentions>
+        <jmeter.lib>${jmeter.home}/lib</jmeter.lib>
+        <jmeter.extentions>${jmeter.lib}/ext</jmeter.extentions>
     </properties>
 
     <dependencies>
@@ -183,6 +184,24 @@
                                 <copy file="target/${project.artifactId}.jar"
                                     todir="${jmeter.extentions}"
                                     overwrite="true" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                        <execution>
+                        <id>copy-perf-mon-jars</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo
+                                    message="Copy ext_plugins/jpgc-perfmon-2.1 to ${jmeter.extentions}" />
+     
+                                 <copy todir="${jmeter.lib}" 
+                                    overwrite="false"> 
+                                     <fileset dir="ext_plugins/jpgc-perfmon-2.1"/>
+                                </copy>   
                             </tasks>
                         </configuration>
                     </execution>
