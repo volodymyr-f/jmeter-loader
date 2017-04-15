@@ -4,13 +4,11 @@ ANSIBLE_GROUPS = {
         "spark" => ["spark"],
         "all:children" => ["kafka", "cassandra", "spark"]
 }
-  
+
 Vagrant.configure(2) do |config|
-
-
+    config.vm.box = "bento/centos-7.3"
 
     config.vm.define "kafka" do |kafka|
-        kafka.vm.box = "bento/centos-6.8"
         kafka.vm.network "private_network", ip: "192.168.33.10"
         kafka.vm.hostname = "kafka"
         kafka.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"
@@ -25,7 +23,6 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define "cassandra" do |cassandra|
-        cassandra.vm.box = "bento/centos-7.3"
         cassandra.vm.network "private_network", ip: "192.168.33.11"
         cassandra.vm.hostname = "cassandra"
         cassandra.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"
@@ -40,7 +37,6 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define "spark" do |spark|
-        spark.vm.box = "bento/centos-6.8"
         spark.vm.network "private_network", ip: "192.168.33.12"
         spark.vm.hostname = "spark"
         spark.vm.provision "shell-install-ansible", type:"shell", path: "bootstrap/install-ansible.sh"

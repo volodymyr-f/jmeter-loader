@@ -9,7 +9,7 @@ PIDS=$(ps ax | grep -i 'kafka\.Kafka' | grep java | grep -v grep | awk '{print $
 
 start() {
     NEXT_WAIT_TIME=0
-    until [ ! -z "$(netstat -tuplen | grep 9092)" ] || [ $NEXT_WAIT_TIME -eq 4 ]; do
+    until [ ! -z "$(netstat -tuplen | grep 9092)" ] || [ $NEXT_WAIT_TIME -eq 10 ]; do
        sleep $(( NEXT_WAIT_TIME++ ))
        nohup /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties > /opt/kafka/logs/kafka-server.log 2>&1 &
     done

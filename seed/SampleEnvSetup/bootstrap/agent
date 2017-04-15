@@ -1,0 +1,42 @@
+#!/bin/bash
+# chkconfig: 2345 20 90
+# description: Script is used to manage server agent
+
+# Source function library.
+. /etc/init.d/functions
+
+PIDS=$(ps ax | grep -i 'server-agent' | grep java | grep -v grep | awk '{print $1}')
+
+start() {
+    nohup /opt/server-agent/startAgent.sh --udp-port 0 --tcp-port {{ agent_port }} --sysinfo > /opt/server-agent/logs/server-agent.log 2>&1 &
+}
+
+stop() {
+    kill -s TERM $PIDS
+}
+
+case "$1" in
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    status)
+       if [ -z "$PIDS" ]; then
+           echo "No agent server is running"
+           exit 1
+       else
+           echo "Agent server is running. Pid is $PIDS"
+           exit 0
+       fi
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0	

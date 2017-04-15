@@ -1,3 +1,4 @@
+agent_port: 3450
 kafka_domain: 192.168.33.10
 kafka_topic: jmeter_loader
 cassandra_domain: 192.168.33.11

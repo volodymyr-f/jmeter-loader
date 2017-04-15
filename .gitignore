@@ -1,0 +1,7 @@
+/target/
+.classpath
+.project
+.settings/
+dependency-reduced-pom.xml
+seed/SampleEnvSetup/.vagrant/
+seed/SampleEnvSetup/playbook.retry

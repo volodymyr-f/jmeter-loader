@@ -1,15 +1,27 @@
 ---
 - hosts: all
+  vars:
+    agent_version: 2.2.1
   remote_user: vagrant
   become: yes
   become_method: sudo
   tasks:
       - name: install general packages
-        yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python,python-pip,git state=present
+        yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python,python-pip,git,unzip state=present
       - name: install java
         script: /vagrant/bootstrap/install_java.sh
         args:
             creates: /opt/java
+      - name: install server agent
+        script: "/vagrant/bootstrap/install_server_agent.sh {{agent_version}}"
+        args:
+            creates: /opt/server-agent
+      - name: copy init scripts to manage agent server
+        template: src={{ item.src }} dest={{ item.dest }} mode=751
+        with_items:
+            - { src: '/vagrant/bootstrap/agent', dest: '/etc/init.d/agent' }
+      - name: start server agent
+        systemd: name=agent enabled=yes state=started daemon_reload=yes
 - hosts: kafka
   vars:
     kafka_home: /opt/kafka
@@ -31,12 +43,10 @@
         with_items:
             - { src: '/vagrant/bootstrap/kafka/kafka', dest: '/etc/init.d/kafka' }
             - { src: '/vagrant/bootstrap/kafka/zookeeper', dest: '/etc/init.d/zookeeper' }
-      - name: prepare shutdown runlevel symlinks for zookeeper and kafka
-        script: /vagrant/bootstrap/kafka/prepare_shutdown_symlinks.sh
       - name: start zookeeper
-        service: name=zookeeper enabled=yes state=started runlevel=0356
+        systemd: name=zookeeper enabled=yes state=started daemon_reload=yes
       - name: start kafka
-        service: name=kafka enabled=yes state=started runlevel=0356
+        systemd: name=kafka enabled=yes state=started daemon_reload=yes
       - name: create topic
         shell: "{{ kafka_home }}/bin/kafka-topics.sh --create --zookeeper {{ kafka_domain }}:{{ zookeeper_port }} --replication-factor {{ kafka_replication_factor }} --partitions {{ kafka_partitions_number }} --topic {{ kafka_topic }} &"  
 - hosts: cassandra
@@ -57,7 +67,7 @@
       - name: configure cassandra
         script: "/vagrant/bootstrap/cassandra/configure_cassandra.sh {{ cassandra_domain }}"
       - name: start cassandra
-        systemd: name=cassandra enabled=yes state=started
+        systemd: name=cassandra enabled=yes state=started daemon_reload=yes
       - name: wait for cassandra server
         local_action: wait_for host={{ cassandra_domain }} state=started port={{ cassandra_port }} delay=20 timeout=40 connect_timeout=10
       - name: create keyspace and table
@@ -103,6 +113,6 @@
           insertbefore: BOF
           create: yes 
       - name: start spark
-        service: name=spark enabled=yes state=started
+        systemd: name=spark enabled=yes state=started daemon_reload=yes
       - name: start spark consumer
-        service: name=consumer enabled=yes state=started
+        systemd: name=consumer enabled=yes state=started daemon_reload=yes
