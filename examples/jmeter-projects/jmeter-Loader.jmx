@@ -22,24 +22,13 @@
         </collectionProp>
       </Arguments>
       <hashTree/>
-      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
-        <stringProp name="filename">${project_home}/sample_data/2016_04_en_clickstream_small.csv</stringProp>
-        <stringProp name="fileEncoding"></stringProp>
-        <stringProp name="variableNames">previous,current,type,hits</stringProp>
-        <stringProp name="delimiter">\t</stringProp>
-        <boolProp name="quotedData">false</boolProp>
-        <boolProp name="recycle">true</boolProp>
-        <boolProp name="stopThread">true</boolProp>
-        <stringProp name="shareMode">shareMode.all</stringProp>
-      </CSVDataSet>
-      <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="JMeter Loder Kafka" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">2</stringProp>
+          <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <longProp name="ThreadGroup.start_time">1404169918000</longProp>
         <longProp name="ThreadGroup.end_time">1404169918000</longProp>
@@ -48,59 +37,78 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
-          <stringProp name="CounterConfig.start">1</stringProp>
-          <stringProp name="CounterConfig.end"></stringProp>
-          <stringProp name="CounterConfig.incr">1</stringProp>
-          <stringProp name="CounterConfig.name">counter_id</stringProp>
-          <stringProp name="CounterConfig.format"></stringProp>
-          <boolProp name="CounterConfig.per_user">false</boolProp>
-        </CounterConfig>
-        <hashTree/>
-        <com.jmeter.ext.message.GeneratedMessage guiclass="TestBeanGUI" testclass="com.jmeter.ext.message.GeneratedMessage" testname="Message1" enabled="true">
-          <stringProp name="className">com.jmeter.ext.loader.Loader</stringProp>
-          <stringProp name="variableName">message1</stringProp>
-          <stringProp name="messageBody">{
-    &quot;m_id&quot;: &quot;${counter_id}&quot;,
-    &quot;tenant_id&quot; : &quot;1001&quot;,
-    &quot;prev_link&quot;: &quot;${previous}&quot;,
-    &quot;curr_link&quot;: &quot;${current}&quot;,
-    &quot;timestamp_clicked&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
-    &quot;timestamp_received&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
-    &quot;message&quot;: &quot;${__randomSentance(6, 10)}&quot;, 
-    &quot;type&quot;: &quot;${type}&quot;
+        <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+          <stringProp name="WhileController.condition">${page}</stringProp>
+        </WhileController>
+        <hashTree>
+          <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+            <stringProp name="filename">${project_home}/sample_data/page_count_small.tsv</stringProp>
+            <stringProp name="fileEncoding"></stringProp>
+            <stringProp name="variableNames">lang,page,hits,size</stringProp>
+            <stringProp name="delimiter"> </stringProp>
+            <boolProp name="quotedData">false</boolProp>
+            <boolProp name="recycle">false</boolProp>
+            <boolProp name="stopThread">true</boolProp>
+            <stringProp name="shareMode">shareMode.all</stringProp>
+          </CSVDataSet>
+          <hashTree/>
+          <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
+            <stringProp name="CounterConfig.start">1</stringProp>
+            <stringProp name="CounterConfig.end"></stringProp>
+            <stringProp name="CounterConfig.incr">1</stringProp>
+            <stringProp name="CounterConfig.name">counter_id</stringProp>
+            <stringProp name="CounterConfig.format"></stringProp>
+            <boolProp name="CounterConfig.per_user">false</boolProp>
+          </CounterConfig>
+          <hashTree/>
+          <com.jmeter.ext.message.GeneratedMessage guiclass="TestBeanGUI" testclass="com.jmeter.ext.message.GeneratedMessage" testname="Message1" enabled="true">
+            <stringProp name="className">com.jmeter.ext.loader.Loader</stringProp>
+            <stringProp name="variableName">message1</stringProp>
+            <stringProp name="messageBody">{
+    &quot;m_id&quot;: ${counter_id},
+    &quot;tenant_id&quot; : 1001,
+    &quot;day&quot;: &quot;2015-05-03&quot;,
+    &quot;hour&quot;: 0,
+    &quot;lang&quot;: &quot;${lang}&quot;,
+    &quot;page&quot;: &quot;${page}&quot;,
+    &quot;last_read&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
+    &quot;last_upd&quot;: &quot;${__randomDate(2017/01/01 01:00:00, 2017/01/01 05:00:00, yyyy/MM/dd HH:mm:ss)}&quot;,
+    &quot;last_commit_message_text&quot;: &quot;XXX&quot;,
+    &quot;hits&quot;: ${hits},
+    &quot;size&quot;: ${size}
 }</stringProp>
-          <stringProp name="variable">message_1</stringProp>
-        </com.jmeter.ext.message.GeneratedMessage>
-        <hashTree/>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="Kafka" enabled="true">
-          <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="kafka_brokers" elementType="Argument">
-                <stringProp name="Argument.name">kafka_brokers</stringProp>
-                <stringProp name="Argument.value">192.168.33.10:9092</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="default_topic" elementType="Argument">
-                <stringProp name="Argument.name">default_topic</stringProp>
-                <stringProp name="Argument.value">loader_1</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="kafka_key" elementType="Argument">
-                <stringProp name="Argument.name">kafka_key</stringProp>
-                <stringProp name="Argument.value">kafka_key</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="message" elementType="Argument">
-                <stringProp name="Argument.name">message</stringProp>
-                <stringProp name="Argument.value">message_1</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="classname">com.jmeter.ext.kafka.KafkaSampler</stringProp>
-        </JavaSampler>
-        <hashTree/>
+            <stringProp name="variable">message_1</stringProp>
+          </com.jmeter.ext.message.GeneratedMessage>
+          <hashTree/>
+          <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="Kafka" enabled="true">
+            <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="kafka_brokers" elementType="Argument">
+                  <stringProp name="Argument.name">kafka_brokers</stringProp>
+                  <stringProp name="Argument.value">192.168.33.10:9092</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+                <elementProp name="default_topic" elementType="Argument">
+                  <stringProp name="Argument.name">default_topic</stringProp>
+                  <stringProp name="Argument.value">loader_1</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+                <elementProp name="kafka_key" elementType="Argument">
+                  <stringProp name="Argument.name">kafka_key</stringProp>
+                  <stringProp name="Argument.value">kafka_key</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+                <elementProp name="message" elementType="Argument">
+                  <stringProp name="Argument.name">message</stringProp>
+                  <stringProp name="Argument.value">message_1</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="classname">com.jmeter.ext.kafka.KafkaSampler</stringProp>
+          </JavaSampler>
+          <hashTree/>
+        </hashTree>
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
@@ -199,6 +207,114 @@
           </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
+        <hashTree/>
+        <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="1t5" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+          <longProp name="interval_grouping">1000</longProp>
+          <boolProp name="graph_aggregated">false</boolProp>
+          <stringProp name="include_sample_labels"></stringProp>
+          <stringProp name="exclude_sample_labels"></stringProp>
+          <stringProp name="start_offset"></stringProp>
+          <stringProp name="end_offset"></stringProp>
+          <boolProp name="include_checkbox_state">false</boolProp>
+          <boolProp name="exclude_checkbox_state">false</boolProp>
+          <collectionProp name="metricConnections">
+            <collectionProp name="-583753721">
+              <stringProp name="-2049280114">192.168.33.10</stringProp>
+              <stringProp name="1571004">3450</stringProp>
+              <stringProp name="2112896831">Disks I/O</stringProp>
+              <stringProp name="0"></stringProp>
+            </collectionProp>
+            <collectionProp name="1822204324">
+              <stringProp name="-2049280114">192.168.33.10</stringProp>
+              <stringProp name="1571004">3450</stringProp>
+              <stringProp name="-1993889503">Memory</stringProp>
+              <stringProp name="0"></stringProp>
+            </collectionProp>
+            <collectionProp name="-1813229681">
+              <stringProp name="-2049280114">192.168.33.10</stringProp>
+              <stringProp name="1571004">3450</stringProp>
+              <stringProp name="2590131">Swap</stringProp>
+              <stringProp name="0"></stringProp>
+            </collectionProp>
+            <collectionProp name="-583753721">
+              <stringProp name="-2049280114">192.168.33.10</stringProp>
+              <stringProp name="1571004">3450</stringProp>
+              <stringProp name="2112896831">Disks I/O</stringProp>
+              <stringProp name="0"></stringProp>
+            </collectionProp>
+          </collectionProp>
+        </kg.apc.jmeter.perfmon.PerfMonCollector>
+        <hashTree/>
+        <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ThreadsStateOverTimeGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Active Threads Over Time" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+          <longProp name="interval_grouping">500</longProp>
+          <boolProp name="graph_aggregated">false</boolProp>
+          <stringProp name="include_sample_labels"></stringProp>
+          <stringProp name="exclude_sample_labels"></stringProp>
+          <stringProp name="start_offset"></stringProp>
+          <stringProp name="end_offset"></stringProp>
+          <boolProp name="include_checkbox_state">false</boolProp>
+          <boolProp name="exclude_checkbox_state">false</boolProp>
+        </kg.apc.jmeter.vizualizers.CorrectedResultCollector>
         <hashTree/>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="JMeter Loader ES" enabled="false">
