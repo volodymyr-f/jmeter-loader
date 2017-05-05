@@ -8,6 +8,8 @@
   tasks:
       - name: install general packages
         yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python,python-pip,git,unzip state=present
+      - name: update hosts file
+        template: src=/vagrant/bootstrap/hosts.j2 dest=/etc/hosts
       - name: install java
         script: /vagrant/bootstrap/install_java.sh
         args:
@@ -75,6 +77,14 @@
 - hosts: spark
   vars:
     spark_version: spark-2.1.0-bin-hadoop2.7
+    zookeeper_version: cloudera-cdh-4-0.x86_64
+    zookeeper_rpm_repo: http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/
+    mesos_version: mesosphere-el-repo-7-3
+    mesos_rpm_repo: http://repos.mesosphere.com/el/7/noarch/RPMS/
+    mesos_cluster_port: 7077
+    mesos_cluster_socket: mesos://{{ spark_domain }}:{{ mesos_cluster_port }}
+    mesos_client_port: 5050
+    mesos_client_socket: "'mesos:\\/\\/{{ spark_domain }}:{{ mesos_client_port }}'"
     sbt_version: sbt-0.13.5
     sbt_rpm_repo: http://dl.bintray.com/sbt/rpm/
   remote_user: vagrant
@@ -87,32 +97,25 @@
         script: "/vagrant/bootstrap/spark/install_spark.sh {{spark_version}}"
         args:
             creates: /opt/spark
+      - name: install zookeeper and mesos rpms
+        yum: name="{{ zookeeper_rpm_repo }}{{ zookeeper_version }}.rpm,{{mesos_rpm_repo}}{{mesos_version}}.noarch.rpm" state=present
+      - name: install zookeeper and mesos servers
+        yum: name=zookeeper,zookeeper-server,mesos state=present
+      - name: init zookeeper
+        shell: "sudo -u zookeeper zookeeper-server-initialize --myid=1 --force"
       - name: install spark consumer
-        script: "/vagrant/bootstrap/spark/install_spark_consumer.sh {{ cassandra_domain }} {{ cassandra_keyspace }} {{ cassandra_table }} {{ kafka_domain }} {{ kafka_topic }}"
+        script: "/vagrant/bootstrap/spark/install_spark_consumer.sh {{ cassandra_domain }} {{ cassandra_keyspace }} {{ cassandra_table }} {{ kafka_domain }} {{ kafka_topic }} {{ mesos_client_socket }}"
         args:
             creates: /opt/spark-structured-streaming-loader
-      - name: copy init.d scripts to manage spark cluster and consumer
-        copy: src={{ item.src }} dest={{ item.dest }} mode=751
+      - name: copy init.d script to manage spark consumer
+        template: src={{ item.src }} dest={{ item.dest }} mode=751
         with_items:
-            - { src: '/vagrant/bootstrap/spark/spark', dest: '/etc/init.d/spark' }
             - { src: '/vagrant/bootstrap/spark/consumer', dest: '/etc/init.d/consumer' }
-      - name: source spark variables
-        blockinfile:
-          dest: "{{ ansible_env.HOME }}/.bashrc"
-          block: |
-            export SPARK_HOME=/opt/spark
-            export SPARK_MASTER_IP={{spark_domain}}
-            export SPARK_MASTER_PORT=7077
-            export SPARK_MASTER_WEBUI_PORT=8080
-            export SPARK_LOCAL_DIRS=$SPARK_HOME/work
-            export SPARK_WORKER_CORES=1
-            export SPARK_WORKER_MEMORY=1G
-            export SPARK_WORKER_INSTANCES=2
-            export SPARK_DAEMON_MEMORY=384m
-          marker: '# {mark} ANSIBLE MANAGED BLOCK - virtualenv'
-          insertbefore: BOF
-          create: yes 
-      - name: start spark
-        systemd: name=spark enabled=yes state=started daemon_reload=yes
+      - name: start zookeeper server
+        systemd: name=zookeeper-server enabled=yes state=started daemon_reload=yes
+      - name: start mesos master
+        systemd: name=mesos-master enabled=yes state=started daemon_reload=yes
+      - name: start mesos slave
+        systemd: name=mesos-slave enabled=yes state=started daemon_reload=yes
       - name: start spark consumer
         systemd: name=consumer enabled=yes state=started daemon_reload=yes
