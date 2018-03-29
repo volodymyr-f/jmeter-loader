@@ -7,13 +7,7 @@
   become_method: sudo
   tasks:
       - name: install general packages
-        yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python,python-pip,git,unzip state=present
-      - name: update hosts file
-        template: src=/vagrant/bootstrap/hosts.j2 dest=/etc/hosts
-      - name: install java
-        script: /vagrant/bootstrap/install_java.sh
-        args:
-            creates: /opt/java
+        yum: name=wget,mc,net-tools,tmux,telnet,vim,libselinux-python,python-pip,git,unzip,java-1.8.0-openjdk-devel state=present
       - name: install server agent
         script: "/vagrant/bootstrap/install_server_agent.sh {{agent_version}}"
         args:
