@@ -1,5 +1,5 @@
 cd /opt
-wget -q http://apache.ip-connect.vn.ua/kafka/0.10.2.0/kafka_$1.tgz
+wget -q http://apache.ip-connect.vn.ua/kafka/0.10.2.1/kafka_$1.tgz
 tar -xf kafka_$1.tgz
 rm kafka_$1.tgz
 mv /opt/kafka_$1 /opt/kafka
