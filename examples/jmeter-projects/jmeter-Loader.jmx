@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jmeterTestPlan version="1.2" properties="2.8" jmeter="2.13 r1665067">
+<jmeterTestPlan version="1.2" properties="4.0" jmeter="4.0 r1823414">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan Example" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
@@ -15,7 +15,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="project_home" elementType="Argument">
             <stringProp name="Argument.name">project_home</stringProp>
-            <stringProp name="Argument.value">${__P(JMETER_LOADER_HOME)}</stringProp>
+            <stringProp name="Argument.value">D:\newOpportunity\jmeter-loader</stringProp>
             <stringProp name="Argument.desc">Path to the project</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -50,6 +50,7 @@
             <boolProp name="recycle">false</boolProp>
             <boolProp name="stopThread">true</boolProp>
             <stringProp name="shareMode">shareMode.all</stringProp>
+            <boolProp name="ignoreFirstLine">false</boolProp>
           </CSVDataSet>
           <hashTree/>
           <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
@@ -90,7 +91,7 @@
                 </elementProp>
                 <elementProp name="default_topic" elementType="Argument">
                   <stringProp name="Argument.name">default_topic</stringProp>
-                  <stringProp name="Argument.value">loader_1</stringProp>
+                  <stringProp name="Argument.value">jmeter_loader</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
                 <elementProp name="kafka_key" elementType="Argument">
@@ -368,8 +369,6 @@
           </elementProp>
           <stringProp name="HTTPSampler.domain">192.168.33.10</stringProp>
           <stringProp name="HTTPSampler.port">9200</stringProp>
-          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-          <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/emails/helloworld/1</stringProp>
@@ -378,9 +377,10 @@
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-          <stringProp name="HTTPSampler.implementation">Java</stringProp>
-          <boolProp name="HTTPSampler.monitor">false</boolProp>
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.implementation">Java</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
