@@ -8,7 +8,7 @@
     <name>jmeter-loader</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <jmeter.home>/usr/local/Cellar/jmeter/2.13/libexec</jmeter.home>
+        <jmeter.home>${env.JMETER_HOME}</jmeter.home>
         <jmeter.lib>${jmeter.home}/lib</jmeter.lib>
         <jmeter.extentions>${jmeter.lib}/ext</jmeter.extentions>
     </properties>
@@ -179,15 +179,14 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo
-                                    message="Copy ${project.artifactId}.jar to ${jmeter.extentions}" />
+                                <echo message="Copy ${project.artifactId}.jar to ${jmeter.extentions}"/>
                                 <copy file="target/${project.artifactId}.jar"
-                                    todir="${jmeter.extentions}"
-                                    overwrite="true" />
+                                      todir="${jmeter.extentions}"
+                                      overwrite="true"/>
                             </tasks>
                         </configuration>
                     </execution>
-                        <execution>
+                    <execution>
                         <id>copy-perf-mon-jars</id>
                         <phase>install</phase>
                         <goals>
@@ -195,13 +194,11 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo
-                                    message="Copy ext_plugins/jpgc-perfmon-2.1 to ${jmeter.extentions}" />
-     
-                                 <copy todir="${jmeter.lib}" 
-                                    overwrite="false"> 
-                                     <fileset dir="ext_plugins/jpgc-perfmon-2.1"/>
-                                </copy>   
+                                <echo message="Copy ext_plugins to ${jmeter.extentions}"/>
+                                <copy todir="${jmeter.lib}"
+                                      overwrite="false">
+                                    <fileset dir="ext_plugins"/>
+                                </copy>
                             </tasks>
                         </configuration>
                     </execution>
